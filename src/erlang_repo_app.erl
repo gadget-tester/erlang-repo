@@ -5,8 +5,7 @@
 -export([stop/1]).
 
 start(_Type, _Args) ->
-	erlang_repo_sup:start_link(),
-  1 = 2.
+	erlang_repo_sup:start_link()
 
 
 stop(_State) ->

@@ -1,2 +1,4 @@
 PROJECT = erlang-repo
-include erlang.mk
+#include erlang.mk
+all:
+	./rebar compile
