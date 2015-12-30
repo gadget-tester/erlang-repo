@@ -16,7 +16,7 @@
 
 ERLANG_MK_FILENAME := $(realpath $(lastword $(MAKEFILE_LIST)))
 
-ERLANG_MK_VERSION = 2.0.0-pre.2-44-g03f2c68
+ERLANG_MK_VERSION = 2.0.0-pre.2-12-g9703566
 
 # Core configuration.
 
@@ -883,6 +883,14 @@ pkg_dh_date_fetch = git
 pkg_dh_date_repo = https://github.com/daleharvey/dh_date
 pkg_dh_date_commit = master
 
+PACKAGES += dhtcrawler
+pkg_dhtcrawler_name = dhtcrawler
+pkg_dhtcrawler_description = dhtcrawler is a DHT crawler written in erlang. It can join a DHT network and crawl many P2P torrents.
+pkg_dhtcrawler_homepage = https://github.com/kevinlynx/dhtcrawler
+pkg_dhtcrawler_fetch = git
+pkg_dhtcrawler_repo = https://github.com/kevinlynx/dhtcrawler
+pkg_dhtcrawler_commit = master
+
 PACKAGES += dirbusterl
 pkg_dirbusterl_name = dirbusterl
 pkg_dirbusterl_description = DirBuster successor in Erlang
@@ -1129,7 +1137,7 @@ pkg_elvis_description = Erlang Style Reviewer
 pkg_elvis_homepage = https://github.com/inaka/elvis
 pkg_elvis_fetch = git
 pkg_elvis_repo = https://github.com/inaka/elvis
-pkg_elvis_commit = master
+pkg_elvis_commit = 0.2.4
 
 PACKAGES += emagick
 pkg_emagick_name = emagick
@@ -1771,14 +1779,6 @@ pkg_geef_fetch = git
 pkg_geef_repo = https://github.com/carlosmn/geef
 pkg_geef_commit = master
 
-PACKAGES += gen_coap
-pkg_gen_coap_name = gen_coap
-pkg_gen_coap_description = Generic Erlang CoAP Client/Server
-pkg_gen_coap_homepage = https://github.com/gotthardp/gen_coap
-pkg_gen_coap_fetch = git
-pkg_gen_coap_repo = https://github.com/gotthardp/gen_coap
-pkg_gen_coap_commit = master
-
 PACKAGES += gen_cycle
 pkg_gen_cycle_name = gen_cycle
 pkg_gen_cycle_description = Simple, generic OTP behaviour for recurring tasks
@@ -1978,14 +1978,6 @@ pkg_hyper_homepage = https://github.com/GameAnalytics/hyper
 pkg_hyper_fetch = git
 pkg_hyper_repo = https://github.com/GameAnalytics/hyper
 pkg_hyper_commit = master
-
-PACKAGES += i18n
-pkg_i18n_name = i18n
-pkg_i18n_description = International components for unicode from Erlang (unicode, date, string, number, format, locale, localization, transliteration, icu4e)
-pkg_i18n_homepage = https://github.com/erlang-unicode/i18n
-pkg_i18n_fetch = git
-pkg_i18n_repo = https://github.com/erlang-unicode/i18n
-pkg_i18n_commit = master
 
 PACKAGES += ibrowse
 pkg_ibrowse_name = ibrowse
@@ -2507,14 +2499,6 @@ pkg_merl_fetch = git
 pkg_merl_repo = https://github.com/richcarl/merl
 pkg_merl_commit = master
 
-PACKAGES += mimerl
-pkg_mimerl_name = mimerl
-pkg_mimerl_description = library to handle mimetypes
-pkg_mimerl_homepage = https://github.com/benoitc/mimerl
-pkg_mimerl_fetch = git
-pkg_mimerl_repo = https://github.com/benoitc/mimerl
-pkg_mimerl_commit = master
-
 PACKAGES += mimetypes
 pkg_mimetypes_name = mimetypes
 pkg_mimetypes_description = Erlang MIME types library
@@ -2746,6 +2730,14 @@ pkg_oauth2_homepage = https://github.com/kivra/oauth2
 pkg_oauth2_fetch = git
 pkg_oauth2_repo = https://github.com/kivra/oauth2
 pkg_oauth2_commit = master
+
+PACKAGES += oauth2c
+pkg_oauth2c_name = oauth2c
+pkg_oauth2c_description = Erlang OAuth2 Client
+pkg_oauth2c_homepage = https://github.com/kivra/oauth2_client
+pkg_oauth2c_fetch = git
+pkg_oauth2c_repo = https://github.com/kivra/oauth2_client
+pkg_oauth2c_commit = master
 
 PACKAGES += octopus
 pkg_octopus_name = octopus
@@ -3913,7 +3905,7 @@ pkg_xref_runner_description = Erlang Xref Runner (inspired in rebar xref)
 pkg_xref_runner_homepage = https://github.com/inaka/xref_runner
 pkg_xref_runner_fetch = git
 pkg_xref_runner_repo = https://github.com/inaka/xref_runner
-pkg_xref_runner_commit = 0.2.3
+pkg_xref_runner_commit = 0.2.0
 
 PACKAGES += yamerl
 pkg_yamerl_name = yamerl
@@ -4098,10 +4090,7 @@ endif
 # While Makefile file could be GNUmakefile or makefile,
 # in practice only Makefile is needed so far.
 define dep_autopatch
-	if [ -f $(DEPS_DIR)/$(1)/erlang.mk ]; then \
-		$(call erlang,$(call dep_autopatch_appsrc.erl,$(1))); \
-		$(call dep_autopatch_erlang_mk,$(1)); \
-	elif [ -f $(DEPS_DIR)/$(1)/Makefile ]; then \
+	if [ -f $(DEPS_DIR)/$(1)/Makefile ]; then \
 		if [ 0 != `grep -c "include ../\w*\.mk" $(DEPS_DIR)/$(1)/Makefile` ]; then \
 			$(call dep_autopatch2,$(1)); \
 		elif [ 0 != `grep -ci rebar $(DEPS_DIR)/$(1)/Makefile` ]; then \
@@ -4109,7 +4098,12 @@ define dep_autopatch
 		elif [ -n "`find $(DEPS_DIR)/$(1)/ -type f -name \*.mk -not -name erlang.mk -exec grep -i rebar '{}' \;`" ]; then \
 			$(call dep_autopatch2,$(1)); \
 		else \
-			$(call erlang,$(call dep_autopatch_app.erl,$(1))); \
+			if [ -f $(DEPS_DIR)/$(1)/erlang.mk ]; then \
+				$(call erlang,$(call dep_autopatch_appsrc.erl,$(1))); \
+				$(call dep_autopatch_erlang_mk,$(1)); \
+			else \
+				$(call erlang,$(call dep_autopatch_app.erl,$(1))); \
+			fi \
 		fi \
 	else \
 		if [ ! -d $(DEPS_DIR)/$(1)/src/ ]; then \
@@ -4121,9 +4115,6 @@ define dep_autopatch
 endef
 
 define dep_autopatch2
-	if [ -f $(DEPS_DIR)/$1/src/$1.app.src.script ]; then \
-		$(call erlang,$(call dep_autopatch_appsrc_script.erl,$(1))); \
-	fi; \
 	$(call erlang,$(call dep_autopatch_appsrc.erl,$(1))); \
 	if [ -f $(DEPS_DIR)/$(1)/rebar.config -o -f $(DEPS_DIR)/$(1)/rebar.config.script ]; then \
 		$(call dep_autopatch_fetch_rebar); \
@@ -4263,6 +4254,57 @@ define dep_autopatch_rebar.erl
 				Write(io_lib:format("COMPILE_FIRST +=~s\n", [Names]))
 		end
 	end(),
+	FindFirst = fun(F, Fd) ->
+		case io:parse_erl_form(Fd, undefined) of
+			{ok, {attribute, _, compile, {parse_transform, PT}}, _} ->
+				[PT, F(F, Fd)];
+			{ok, {attribute, _, compile, CompileOpts}, _} when is_list(CompileOpts) ->
+				case proplists:get_value(parse_transform, CompileOpts) of
+					undefined -> [F(F, Fd)];
+					PT -> [PT, F(F, Fd)]
+				end;
+			{ok, {attribute, _, include, Hrl}, _} ->
+				case file:open("$(call core_native_path,$(DEPS_DIR)/$1/include/)" ++ Hrl, [read]) of
+					{ok, HrlFd} -> [F(F, HrlFd), F(F, Fd)];
+					_ ->
+						case file:open("$(call core_native_path,$(DEPS_DIR)/$1/src/)" ++ Hrl, [read]) of
+							{ok, HrlFd} -> [F(F, HrlFd), F(F, Fd)];
+							_ -> [F(F, Fd)]
+						end
+				end;
+			{ok, {attribute, _, include_lib, "$(1)/include/" ++ Hrl}, _} ->
+				{ok, HrlFd} = file:open("$(call core_native_path,$(DEPS_DIR)/$1/include/)" ++ Hrl, [read]),
+				[F(F, HrlFd), F(F, Fd)];
+			{ok, {attribute, _, include_lib, Hrl}, _} ->
+				case file:open("$(call core_native_path,$(DEPS_DIR)/$1/include/)" ++ Hrl, [read]) of
+					{ok, HrlFd} -> [F(F, HrlFd), F(F, Fd)];
+					_ -> [F(F, Fd)]
+				end;
+			{ok, {attribute, _, import, {Imp, _}}, _} ->
+				case file:open("$(call core_native_path,$(DEPS_DIR)/$1/src/)" ++ atom_to_list(Imp) ++ ".erl", [read]) of
+					{ok, ImpFd} -> [Imp, F(F, ImpFd), F(F, Fd)];
+					_ -> [F(F, Fd)]
+				end;
+			{eof, _} ->
+				file:close(Fd),
+				[];
+			_ ->
+				F(F, Fd)
+		end
+	end,
+	fun() ->
+		ErlFiles = filelib:wildcard("$(call core_native_path,$(DEPS_DIR)/$1/src/)*.erl"),
+		First0 = lists:usort(lists:flatten([begin
+			{ok, Fd} = file:open(F, [read]),
+			FindFirst(FindFirst, Fd)
+		end || F <- ErlFiles])),
+		First = lists:flatten([begin
+			{ok, Fd} = file:open("$(call core_native_path,$(DEPS_DIR)/$1/src/)" ++ atom_to_list(M) ++ ".erl", [read]),
+			FindFirst(FindFirst, Fd)
+		end || M <- First0, lists:member("$(call core_native_path,$(DEPS_DIR)/$1/src/)" ++ atom_to_list(M) ++ ".erl", ErlFiles)]) ++ First0,
+		Write(["COMPILE_FIRST +=", [[" ", atom_to_list(M)] || M <- First,
+			lists:member("$(call core_native_path,$(DEPS_DIR)/$1/src/)" ++ atom_to_list(M) ++ ".erl", ErlFiles)], "\n"])
+	end(),
 	Write("\n\nrebar_dep: preprocess pre-deps deps pre-app app\n"),
 	Write("\npreprocess::\n"),
 	Write("\npre-deps::\n"),
@@ -4375,10 +4417,9 @@ define dep_autopatch_rebar.erl
 					Output, ": $$\(foreach ext,.c .C .cc .cpp,",
 						"$$\(patsubst %$$\(ext),%.o,$$\(filter %$$\(ext),$$\(wildcard", Input, "))))\n",
 					"\t$$\(CC) -o $$\@ $$\? $$\(LDFLAGS) $$\(ERL_LDFLAGS) $$\(DRV_LDFLAGS) $$\(EXE_LDFLAGS)",
-					case {filename:extension(Output), $(PLATFORM)} of
-					    {[], _} -> "\n";
-					    {_, darwin} -> "\n";
-					    _ -> " -shared\n"
+					case filename:extension(Output) of
+						[] -> "\n";
+						_ -> " -shared\n"
 					end])
 			end,
 			[PortSpec(S) || S <- PortSpecs]
@@ -4444,15 +4485,6 @@ define dep_autopatch_app.erl
 		end
 	end,
 	UpdateModules("$(call core_native_path,$(DEPS_DIR)/$1/ebin/$1.app)"),
-	halt()
-endef
-
-define dep_autopatch_appsrc_script.erl
-	AppSrc = "$(call core_native_path,$(DEPS_DIR)/$1/src/$1.app.src)",
-	AppSrcScript = AppSrc ++ ".script",
-	Bindings = erl_eval:new_bindings(),
-	{ok, Conf} = file:script(AppSrcScript, Bindings),
-	ok = file:write_file(AppSrc, io_lib:format("~p.~n", [Conf])),
 	halt()
 endef
 
@@ -4542,11 +4574,10 @@ $(DEPS_DIR)/$(call dep_name,$1):
 		exit 17; \
 	fi
 	$(verbose) mkdir -p $(DEPS_DIR)
-	$(dep_verbose) $(call dep_fetch_$(strip $(call dep_fetch,$(1))),$(1))
-	$(verbose) if [ -f $(DEPS_DIR)/$(1)/configure.ac -o -f $(DEPS_DIR)/$(1)/configure.in ] \
-			&& [ ! -f $(DEPS_DIR)/$(1)/configure ]; then \
-		echo " AUTO  " $(1); \
-		cd $(DEPS_DIR)/$(1) && autoreconf -Wall -vif -I m4; \
+	$(dep_verbose) $(call dep_fetch_$(strip $(call dep_fetch,$1)),$1)
+	$(verbose) if [ -f $(DEPS_DIR)/$(DEP_NAME)/configure.ac -o -f $(DEPS_DIR)/$(DEP_NAME)/configure.in ]; then \
+		echo " AUTO  " $(DEP_STR); \
+		cd $(DEPS_DIR)/$(DEP_NAME) && autoreconf -Wall -vif -I m4; \
 	fi
 	- $(verbose) if [ -f $(DEPS_DIR)/$(DEP_NAME)/configure ]; then \
 		echo " CONF  " $(DEP_STR); \
@@ -4630,20 +4661,6 @@ dtl_verbose = $(dtl_verbose_$(V))
 
 # Core targets.
 
-DTL_FILES = $(sort $(call core_find,$(DTL_PATH),*.dtl))
-
-ifneq ($(DTL_FILES),)
-
-ifdef DTL_FULL_PATH
-BEAM_FILES += $(addprefix ebin/,$(patsubst %.dtl,%_dtl.beam,$(subst /,_,$(DTL_FILES:$(DTL_PATH)%=%))))
-else
-BEAM_FILES += $(addprefix ebin/,$(patsubst %.dtl,%_dtl.beam,$(notdir $(DTL_FILES))))
-endif
-
-# Rebuild templates when the Makefile changes.
-$(DTL_FILES): $(MAKEFILE_LIST)
-	@touch $@
-
 define erlydtl_compile.erl
 	[begin
 		Module0 = case "$(strip $(DTL_FULL_PATH))" of
@@ -4662,10 +4679,23 @@ define erlydtl_compile.erl
 	halt().
 endef
 
-ebin/$(PROJECT).app:: $(DTL_FILES) | ebin/
-	$(if $(strip $?),\
-		$(dtl_verbose) $(call erlang,$(call erlydtl_compile.erl,$?),-pa ebin/ $(DEPS_DIR)/erlydtl/ebin/))
+ifneq ($(wildcard src/),)
 
+DTL_FILES = $(sort $(call core_find,$(DTL_PATH),*.dtl))
+
+ifdef DTL_FULL_PATH
+BEAM_FILES += $(addprefix ebin/,$(patsubst %.dtl,%_dtl.beam,$(subst /,_,$(DTL_FILES:$(DTL_PATH)%=%))))
+else
+BEAM_FILES += $(addprefix ebin/,$(patsubst %.dtl,%_dtl.beam,$(notdir $(DTL_FILES))))
+endif
+
+# Rebuild templates when the Makefile changes.
+$(DTL_FILES): $(MAKEFILE_LIST)
+	@touch $@
+
+ebin/$(PROJECT).app:: $(DTL_FILES)
+	$(if $(strip $?),\
+		$(dtl_verbose) $(call erlang,$(call erlydtl_compile.erl,$?,-pa ebin/ $(DEPS_DIR)/erlydtl/ebin/)))
 endif
 
 # Copyright (c) 2015, Loïc Hoguin <essen@ninenines.eu>
@@ -4839,79 +4869,51 @@ $(PROJECT).d:: $(XRL_FILES) $(YRL_FILES)
 # Erlang and Core Erlang files.
 
 define makedep.erl
-	E = ets:new(makedep, [bag]),
-	G = digraph:new([acyclic]),
 	ErlFiles = lists:usort(string:tokens("$(ERL_FILES)", " ")),
-	Modules = [{list_to_atom(filename:basename(F, ".erl")), F} || F <- ErlFiles],
-	Add = fun (Mod, Dep) ->
-		case lists:keyfind(Dep, 1, Modules) of
-			false -> ok;
-			{_, DepFile} ->
-				{_, ModFile} = lists:keyfind(Mod, 1, Modules),
-				ets:insert(E, {ModFile, DepFile}),
-				digraph:add_vertex(G, Mod),
-				digraph:add_vertex(G, Dep),
-				digraph:add_edge(G, Mod, Dep)
+	Modules = [{filename:basename(F, ".erl"), F} || F <- ErlFiles],
+	Add = fun (Dep, Acc) ->
+		case lists:keyfind(atom_to_list(Dep), 1, Modules) of
+			{_, DepFile} -> [DepFile|Acc];
+			false -> Acc
 		end
 	end,
-	AddHd = fun (F, Mod, DepFile) ->
-		case file:open(DepFile, [read]) of
-			{error, enoent} -> ok;
-			{ok, Fd} ->
-				F(F, Fd, Mod),
-				{_, ModFile} = lists:keyfind(Mod, 1, Modules),
-				ets:insert(E, {ModFile, DepFile})
+	AddHd = fun (Dep, Acc) ->
+		case {Dep, lists:keymember(Dep, 2, Modules)} of
+			{"src/" ++ _, false} -> [Dep|Acc];
+			{"include/" ++ _, false} -> [Dep|Acc];
+			_ -> Acc
 		end
 	end,
-	Attr = fun
-		(F, Mod, behavior, Dep) -> Add(Mod, Dep);
-		(F, Mod, behaviour, Dep) -> Add(Mod, Dep);
-		(F, Mod, compile, {parse_transform, Dep}) -> Add(Mod, Dep);
-		(F, Mod, compile, Opts) when is_list(Opts) ->
-			case proplists:get_value(parse_transform, Opts) of
-				undefined -> ok;
-				Dep -> Add(Mod, Dep)
-			end;
-		(F, Mod, include, Hrl) ->
-			case filelib:is_file("include/" ++ Hrl) of
-				true -> AddHd(F, Mod, "include/" ++ Hrl);
-				false ->
-					case filelib:is_file("src/" ++ Hrl) of
-						true -> AddHd(F, Mod, "src/" ++ Hrl);
-						false -> false
-					end
-			end;
-		(F, Mod, include_lib, "$1/include/" ++ Hrl) -> AddHd(F, Mod, "include/" ++ Hrl);
-		(F, Mod, include_lib, Hrl) -> AddHd(F, Mod, "include/" ++ Hrl);
-		(F, Mod, import, {Imp, _}) ->
-			case filelib:is_file("src/" ++ atom_to_list(Imp) ++ ".erl") of
-				false -> ok;
-				true -> Add(Mod, Imp)
-			end;
-		(_, _, _, _) -> ok
-	end,
-	MakeDepend = fun(F, Fd, Mod) ->
-		case io:parse_erl_form(Fd, undefined) of
-			{ok, {attribute, _, Key, Value}, _} ->
-				Attr(F, Mod, Key, Value),
-				F(F, Fd, Mod);
-			{eof, _} ->
-				file:close(Fd);
-			_ ->
-				F(F, Fd, Mod)
+	CompileFirst = fun (Deps) ->
+		First0 = [case filename:extension(D) of
+			".erl" -> filename:basename(D, ".erl");
+			_ -> []
+		end || D <- Deps],
+		case lists:usort(First0) of
+			[] -> [];
+			[[]] -> [];
+			First -> ["COMPILE_FIRST +=", [[" ", F] || F <- First], "\n"]
 		end
 	end,
-	[begin
-		Mod = list_to_atom(filename:basename(F, ".erl")),
-		{ok, Fd} = file:open(F, [read]),
-		MakeDepend(MakeDepend, Fd, Mod)
+	Depend = [begin
+		case epp:parse_file(F, ["include/"], []) of
+			{ok, Forms} ->
+				Deps = lists:usort(lists:foldl(fun
+					({attribute, _, behavior, Dep}, Acc) -> Add(Dep, Acc);
+					({attribute, _, behaviour, Dep}, Acc) -> Add(Dep, Acc);
+					({attribute, _, compile, {parse_transform, Dep}}, Acc) -> Add(Dep, Acc);
+					({attribute, _, file, {Dep, _}}, Acc) -> AddHd(Dep, Acc);
+					(_, Acc) -> Acc
+				end, [], Forms)),
+				case Deps of
+					[] -> "";
+					_ -> [F, "::", [[" ", D] || D <- Deps], "; @touch \$$@\n", CompileFirst(Deps)]
+				end;
+			{error, enoent} ->
+				[]
+		end
 	end || F <- ErlFiles],
-	Depend = sofs:to_external(sofs:relation_to_family(sofs:relation(ets:tab2list(E)))),
-	CompileFirst = [X || X <- lists:reverse(digraph_utils:topsort(G)), [] =/= digraph:in_neighbours(G, X)],
-	ok = file:write_file("$(1)", [
-		[[F, "::", [[" ", D] || D <- Deps], "; @touch \$$@\n"] || {F, Deps} <- Depend],
-		"\nCOMPILE_FIRST +=", [[" ", atom_to_list(CF)] || CF <- CompileFirst], "\n"
-	]),
+	ok = file:write_file("$(1)", Depend),
 	halt()
 endef
 
@@ -5589,32 +5591,12 @@ list-templates:
 
 C_SRC_DIR ?= $(CURDIR)/c_src
 C_SRC_ENV ?= $(C_SRC_DIR)/env.mk
-C_SRC_OUTPUT ?= $(CURDIR)/priv/$(PROJECT)
+C_SRC_OUTPUT ?= $(CURDIR)/priv/$(PROJECT).so
 C_SRC_TYPE ?= shared
 
 # System type and C compiler/flags.
 
-ifeq ($(PLATFORM),msys2)
-	C_SRC_OUTPUT_EXECUTABLE_EXTENSION ?= .exe
-	C_SRC_OUTPUT_SHARED_EXTENSION ?= .dll
-else
-	C_SRC_OUTPUT_EXECUTABLE_EXTENSION ?=
-	C_SRC_OUTPUT_SHARED_EXTENSION ?= .so
-endif
-
-ifeq ($(C_SRC_TYPE),shared)
-	C_SRC_OUTPUT_FILE = $(C_SRC_OUTPUT)$(C_SRC_OUTPUT_SHARED_EXTENSION)
-else
-	C_SRC_OUTPUT_FILE = $(C_SRC_OUTPUT)$(C_SRC_OUTPUT_EXECUTABLE_EXTENSION)
-endif
-
-ifeq ($(PLATFORM),msys2)
-# We hardcode the compiler used on MSYS2. The default CC=cc does
-# not produce working code. The "gcc" MSYS2 package also doesn't.
-	CC = /mingw64/bin/gcc
-	CFLAGS ?= -O3 -std=c99 -finline-functions -Wall -Wmissing-prototypes
-	CXXFLAGS ?= -O3 -finline-functions -Wall
-else ifeq ($(PLATFORM),darwin)
+ifeq ($(PLATFORM),darwin)
 	CC ?= cc
 	CFLAGS ?= -O3 -std=c99 -arch x86_64 -finline-functions -Wall -Wmissing-prototypes
 	CXXFLAGS ?= -O3 -arch x86_64 -finline-functions -Wall
@@ -5629,15 +5611,10 @@ else ifeq ($(PLATFORM),linux)
 	CXXFLAGS ?= -O3 -finline-functions -Wall
 endif
 
-ifneq ($(PLATFORM),msys2)
-	CFLAGS += -fPIC
-	CXXFLAGS += -fPIC
-endif
+CFLAGS += -fPIC -I $(ERTS_INCLUDE_DIR) -I $(ERL_INTERFACE_INCLUDE_DIR)
+CXXFLAGS += -fPIC -I $(ERTS_INCLUDE_DIR) -I $(ERL_INTERFACE_INCLUDE_DIR)
 
-CFLAGS += -I"$(ERTS_INCLUDE_DIR)" -I"$(ERL_INTERFACE_INCLUDE_DIR)"
-CXXFLAGS += -I"$(ERTS_INCLUDE_DIR)" -I"$(ERL_INTERFACE_INCLUDE_DIR)"
-
-LDLIBS += -L"$(ERL_INTERFACE_LIB_DIR)" -lerl_interface -lei
+LDLIBS += -L $(ERL_INTERFACE_LIB_DIR) -lerl_interface -lei
 
 # Verbosity.
 
@@ -5674,15 +5651,15 @@ OBJECTS = $(addsuffix .o, $(basename $(SOURCES)))
 COMPILE_C = $(c_verbose) $(CC) $(CFLAGS) $(CPPFLAGS) -c
 COMPILE_CPP = $(cpp_verbose) $(CXX) $(CXXFLAGS) $(CPPFLAGS) -c
 
-app:: $(C_SRC_ENV) $(C_SRC_OUTPUT_FILE)
+app:: $(C_SRC_ENV) $(C_SRC_OUTPUT)
 
-test-build:: $(C_SRC_ENV) $(C_SRC_OUTPUT_FILE)
+test-build:: $(C_SRC_ENV) $(C_SRC_OUTPUT)
 
-$(C_SRC_OUTPUT_FILE): $(OBJECTS)
+$(C_SRC_OUTPUT): $(OBJECTS)
 	$(verbose) mkdir -p priv/
 	$(link_verbose) $(CC) $(OBJECTS) \
 		$(LDFLAGS) $(if $(filter $(C_SRC_TYPE),shared),-shared) $(LDLIBS) \
-		-o $(C_SRC_OUTPUT_FILE)
+		-o $(C_SRC_OUTPUT)
 
 %.o: %.c
 	$(COMPILE_C) $(OUTPUT_OPTION) $<
@@ -5699,13 +5676,13 @@ $(C_SRC_OUTPUT_FILE): $(OBJECTS)
 clean:: clean-c_src
 
 clean-c_src:
-	$(gen_verbose) rm -f $(C_SRC_OUTPUT_FILE) $(OBJECTS)
+	$(gen_verbose) rm -f $(C_SRC_OUTPUT) $(OBJECTS)
 
 endif
 
 ifneq ($(wildcard $(C_SRC_DIR)),)
 $(C_SRC_ENV):
-	$(verbose) $(ERL) -eval "file:write_file(\"$(call core_native_path,$(C_SRC_ENV))\", \
+	$(verbose) $(ERL) -eval "file:write_file(\"$(C_SRC_ENV)\", \
 		io_lib:format( \
 			\"ERTS_INCLUDE_DIR ?= ~s/erts-~s/include/~n\" \
 			\"ERL_INTERFACE_INCLUDE_DIR ?= ~s~n\" \
@@ -5947,8 +5924,9 @@ DIALYZER_PLT ?= $(CURDIR)/.$(PROJECT).plt
 export DIALYZER_PLT
 
 PLT_APPS ?=
-DIALYZER_DIRS ?= --src -r $(wildcard src) $(ALL_APPS_DIRS)
-DIALYZER_OPTS ?= -Werror_handling -Wrace_conditions -Wunmatched_returns # -Wunderspecs
+DIALYZER_DIRS ?= --src -r src
+DIALYZER_OPTS ?= -Werror_handling -Wrace_conditions \
+	-Wunmatched_returns # -Wunderspecs
 
 # Core targets.
 
@@ -5964,18 +5942,6 @@ help::
 
 # Plugin-specific targets.
 
-define filter_opts.erl
-	Opts = binary:split(<<"$1">>, <<"-">>, [global]),
-	Filtered = lists:reverse(lists:foldl(fun
-		(O = <<"pa ", _/bits>>, Acc) -> [O|Acc];
-		(O = <<"D ", _/bits>>, Acc) -> [O|Acc];
-		(O = <<"I ", _/bits>>, Acc) -> [O|Acc];
-		(_, Acc) -> Acc
-	end, [], Opts)),
-	io:format("~s~n", [[["-", O] || O <- Filtered]]),
-	halt().
-endef
-
 $(DIALYZER_PLT): deps app
 	$(verbose) dialyzer --build_plt --apps erts kernel stdlib $(PLT_APPS) $(OTP_DEPS) $(LOCAL_DEPS) $(DEPS)
 
@@ -5989,7 +5955,7 @@ dialyze:
 else
 dialyze: $(DIALYZER_PLT)
 endif
-	$(verbose) dialyzer --no_native `$(call erlang,$(call filter_opts.erl,$(ERLC_OPTS)))` $(DIALYZER_DIRS) $(DIALYZER_OPTS)
+	$(verbose) dialyzer --no_native $(DIALYZER_DIRS) $(DIALYZER_OPTS)
 
 # Copyright (c) 2013-2015, Loïc Hoguin <essen@ninenines.eu>
 # This file is part of erlang.mk and subject to the terms of the ISC License.
@@ -6473,3 +6439,4 @@ cover-report:
 
 endif
 endif # ifneq ($(COVER_REPORT_DIR),)
+
