@@ -1,3 +1,4 @@
 ebin/
 .rebar/
 _build/
+erlang-repo.d
