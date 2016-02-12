@@ -1,0 +1,4 @@
+.erlang-repo.plt
+ebin/
+deps/
+erlang-repo.d
