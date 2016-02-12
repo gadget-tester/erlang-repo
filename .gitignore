@@ -1,0 +1,7 @@
+.erlang-repo.plt
+ebin/
+deps/
+erlang-repo.d
+_build
+.erlang.mk
+.rebar*
