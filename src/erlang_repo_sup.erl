@@ -1,8 +1,8 @@
--module(erlang-repo_sup).
+-module(erlang_repo_sup).
 -behaviour(supervisor).
 
 -export([start_link/0]).
--export([init/1]).
+-export([init/1, end/0]).
 
 start_link() ->
 	supervisor:start_link({local, ?MODULE}, ?MODULE, []).
