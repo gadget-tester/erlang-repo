@@ -1,4 +1,4 @@
--module(erlang_repo_sup).
+-module(erlang_repo_su).
 -behaviour(supervisor).
 
 -export([start_link/0, init/1]).
