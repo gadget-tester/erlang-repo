@@ -1,7 +1,7 @@
 -module(erlang_repo_sup).
 -behaviour(supervisor).
 
--export([start_link/0]).
+-export([start_link/0, init/1]).
 
 -spec start_link() -> ok.
 start_link() ->
