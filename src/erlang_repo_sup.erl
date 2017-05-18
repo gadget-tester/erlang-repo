@@ -12,3 +12,6 @@ start_link() ->
 init([]) ->
     Procs = [],
     {ok, {{one_for_one, 1, 5}, Procs}}.
+
+not_used() ->
+  nothing.
